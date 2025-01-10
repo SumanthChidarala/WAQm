@@ -1,0 +1,136 @@
+/* Global Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f4f7fc;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Centering the container */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    opacity: 0.9;
+}
+
+/* Form Box Styling */
+.form-box {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    text-align: center;
+}
+
+/* Header Styling */
+.form-box h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Input Field Styling */
+.input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.input-group input:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+/* Submit Button Styling */
+.btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    margin-bottom: 20px;
+    padding: 14px 24px;  /* Increased padding for more space around the text */
+    border-radius: 4px;
+    width: 100%;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    justify-content: center;
+
+}
+
+.btn:hover {
+    background-color: #45a049;
+}
+
+/* Google Button Styling */
+.google-btn {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 10px;
+    background-color: #4285F4;
+    color: white;
+    padding: 14px 24px;  /* Increased padding for more space around the text */
+    border-radius: 4px;
+    text-decoration: none;
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    justify-content: center;
+}
+
+.google-btn:hover {
+    background-color: #357ae8;
+}
+
+/* Google Logo Styling */
+.google-logo {
+    width: 20px; /* Adjust size */
+    height: auto;
+    margin-right: 10px; /* Space between the logo and the text */
+}
+
+/* Responsive Design for Buttons */
+@media (max-width: 400px) {
+    .google-btn {
+        width: 90%;
+    }
+
+    .btn {
+        width: 90%;
+    }
+
+    .form-box {
+        width: 90%;
+    }
+}
+.error {
+    font-size: 14px;
+    margin-top: 5px;
+    display: block;
+    color: red;
+}

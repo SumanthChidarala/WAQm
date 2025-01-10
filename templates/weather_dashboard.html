@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather & Environment Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('{{ url_for('static', filename='bg.jpg') }}');
+            background-repeat: repeat;
+            background-size: tile;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: flex-start; /* Align items from top */
+            align-items: center;
+            min-height: 70vh; /* Ensure body takes at least full viewport height */
+            margin: 0; /* Remove default margin */
+            flex-direction: column; /* Stack elements vertically */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        .container.mt-5 {
+            margin-top: 100px;
+            background-color: rgb(232 224 224 / 65%); /* 0.5 Transparency */
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            margin-bottom:30px;
+        }
+
+        .row.mt-4 {
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .card-body {
+            background-color: rgba(255, 255, 255, 0.8); /* Optional: Adding slight transparency to the cards for consistency */
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+        }
+
+        .mani {
+            display: flex;
+            flex-direction: column; /* Stack the content vertically */
+            align-items: flex-start; /* Align content to the left */
+            margin-top: 20px; /* Adds space between the grid and the 'mani' div */
+            padding: 10px;
+            width: 100%; /* Ensure the mani div takes the full width */
+        }
+
+        .mani h1 {
+            margin: 0; /* Remove any extra margins */
+            font-size: 24px;
+            font-weight: bold;
+            text-align: left; /* Align the title to the left */
+        }
+
+        .news-container {
+            display: flex;
+            flex-direction: column; /* Ensure news articles are stacked vertically */
+            gap: 20px;
+            width: 100%;
+            flex-direction:row;
+            margin-top:20px;
+            margin-bottom:20px;
+        }
+
+
+        .news-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            max-width: 300px;
+        }
+
+        .news-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .news-card .content {
+            padding: 15px;
+        }
+
+        .news-card h5 {
+            font-size: 16px;
+            margin: 0 0 10px;
+        }
+
+        .news-card h5 a {
+            font-size: 18px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .news-card h5 a:hover {
+            text-decoration: underline;
+        }
+
+        .news-card p {
+            font-size: 14px;
+            margin: 0 0 10px;
+            color: #555;
+        }
+        .chart-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            width:400px;
+            height:400px;
+        }
+        .login-btn {
+            position: absolute; /* Position the button absolutely within the container */
+            top: 10px; /* Distance from the top of the container */
+            right: 10px; /* Distance from the right side of the container */
+            z-index: 10; /* Ensure the button is on top of other elements */
+        }
+        /* Overall header styling */
+        .header {
+            display: flex;
+            width: 100%;
+            justify-content: space-between; /* Aligns .h1 and .h2 on opposite sides */
+            align-items: center; /* Centers content vertically */
+            background-color: #2c3e50; /* Dark background color */
+            padding: 10px 20px; /* Adds padding around the header */
+            color: white; /* Ensures text color is visible */
+            position: fixed;
+            z-index:1;  
+        }
+
+        /* Styling for the title section */
+        .h1 {
+            width: 50%;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .h1 h3 {
+            margin: 0; /* Removes default margin for h3 */
+            font-size: 24px; /* Makes the title larger */
+        }
+
+        /* Styling for the navigation links */
+        .h2 {
+            display: flex;
+             /* Places links in reverse order */
+            width: 50%;
+            justify-content: flex-end; /* Ensures links align to the right */
+            gap: 20px; /* Adds space between links */
+        }
+
+        /* Styling for links */
+        .h2 p {
+            margin: 0; /* Removes default margin */
+        }
+
+        a {
+            text-decoration: none; /* Removes underline from links */
+            color: #ecf0f1; /* Light color for contrast */
+            font-size: 16px;
+            font-family: 'Arial', sans-serif;
+            transition: color 0.3s ease; /* Adds a smooth transition effect */
+        }
+
+        /* Hover effect for links */
+        a:hover {
+            color: #1abc9c; /* Changes link color on hover */
+        }
+
+    </style>
+</head>
+<body>
+        <div class='header'>
+            <div class='h1'>
+                <h3>Weather & Environment Dashboard </h3>   
+            </div>
+            <div class='h2'>
+                <p><a href="/">Home</a></p>
+                <p><a href="/ctlogin">Carbon Tracker</a></p>               
+                <p><a href="/clogin">Community</a></p>                
+                
+            </div>
+        </div>
+        <div class="container mt-5" style="margin-top: 100px !important;">
+        <!-- Search Box for City -->
+        <div class="row mt-3 justify-content-center">
+            <div class="col-6 text-center">
+                <form method="POST" class="d-flex justify-content-center">
+                    <input type="text" name="city" class="form-control" placeholder="Enter city name" value="{{ city }}" style="max-width: 400px;">
+                    <button class="btn btn-primary ms-2" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Weather Details in Grid (3x3 Layout) -->
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Temperature</h5>
+                        <p class="card-text">{{ weather_info.temperature }}°C</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Feels Like</h5>
+                        <p class="card-text">{{ weather_info.feels_like }}°C</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Humidity</h5>
+                        <p class="card-text">{{ weather_info.humidity }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Wind Speed</h5>
+                        <p class="card-text">{{ weather_info.wind_speed }} KPH</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Visibility</h5>
+                        <p class="card-text">{{ weather_info.visibility }} km</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Pressure</h5>
+                        <p class="card-text">{{ weather_info.pressure }} hPa</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Sunrise</h5>
+                        <p class="card-text">{{ weather_info.sunrise }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Sunset</h5>
+                        <p class="card-text">{{ weather_info.sunset }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">AQI</h5>
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+                            <p>{{ weather_info.aqi_level }}</p> 
+                            <p class="card-text" style="color: {{ weather_info.aqi_color }};">
+                                {{ weather_info.aqi_description }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 'mani' Div Below the Grid -->
+        <div class="mani">
+            <h1>Latest News for {{ city }}</h1>
+            <div class="news-container">
+                {% for article in articles %}
+                    <div class="news-card">
+                        {% if article.image_url %}
+                            <img src="{{ article.image_url }}" alt="News Image">
+                        {% else %}
+                            <img src="https://via.placeholder.com/300x150?text=No+Image+Available" alt="Placeholder">
+                        {% endif %}
+                        <div class="content">
+                            <h5>
+                                <a href="{{ article.link }}" target="_blank">{{ article.title }}</a>
+                            </h5>
+
+                        </div>
+                    </div>
+                {% else %}
+                    <p>No news available</p>
+                {% endfor %}
+            </div>
+            <h1>Youtube Videos for {{ city }}</h1>
+            <div class="news-container">
+                {% for video in videos %}
+                    <div class="news-card">
+                        <iframe  src="https://www.youtube.com/embed/{{ video.video_id }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <div class="content">
+                            <h5>
+                                <a href="https://www.youtube.com/watch?v={{ video.video_id }}" target="_blank">{{ video.title }}</a>
+                            </h5>
+            
+                        </div>
+                    </div>
+                {% else %}
+                    <p>No weather videos available</p>
+                {% endfor %}
+            </div>
+            <h1>Charts for {{ city }}</h1>
+            <div class="news-container">
+                <!-- Chart 1 -->
+                <div class="chart-card" style="width: 100%; padding: 20px;">
+                    <canvas id="chart1"></canvas>
+                </div>
+                <!-- Chart 2 -->
+                <div class="chart-card" style="width: 100%; padding: 20px;">
+                    <canvas id="chart2"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Chart 1: Weather Parameters
+    // Chart 1: Temperature and Feels Like
+const weatherData = {
+    labels: ['Temperature (°C)', 'Feels Like (°C)'], // Only Temperature and Feels Like
+    datasets: [{
+        label: 'Temperature Chart',
+        data: [
+            {{ weather_info['temperature'] }},
+            {{ weather_info['feels_like'] }}
+        ],
+        backgroundColor: [
+            'rgba(255, 99, 132, 0.2)', // Light red
+            'rgba(54, 162, 235, 0.2)'  // Light blue
+        ],
+        borderColor: [
+            'rgba(255, 99, 132, 1)', // Dark red
+            'rgba(54, 162, 235, 1)'  // Dark blue
+        ],
+        borderWidth: 1
+    }]
+};
+
+const ctx1 = document.getElementById('chart1').getContext('2d');
+new Chart(ctx1, {
+    type: 'bar',
+    data: weatherData,
+    options: {
+        plugins: {
+            legend: {
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+
+    // Chart 2: Humidity, Pressure, and Wind Speed
+const weatherDetails = {
+    labels: ['Humidity (%)', 'Pressure (hPa)', 'Wind Speed (m/s)'],
+    datasets: [{
+        label: 'Humidity (%) / Pressure (hPa) / Wind Speed (m/s)',
+        data: [
+            {{ weather_info['humidity'] }},
+            {{ weather_info['pressure'] }},
+            {{ weather_info['wind_speed'] }}
+        ],
+        backgroundColor: 'rgba(75, 192, 192, 0.2)', // Light aqua
+        borderColor: 'rgba(75, 192, 192, 1)',       // Aqua
+        borderWidth: 2,
+        tension: 0.4, // Smooth curves
+        pointBackgroundColor: ['#00bcd4', '#9c27b0', '#ff9800'], // Point colors
+        pointRadius: 5 // Size of points
+    }]
+};
+
+const ctx2 = document.getElementById('chart2').getContext('2d');
+new Chart(ctx2, {
+    type: 'line',
+    data: weatherDetails,
+    options: {
+        plugins: {
+            legend: {
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+</script>
+
+</body>
+</html>

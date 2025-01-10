@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Carbon Tracking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ctstyles.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            background-image: url('{{ url_for('static', filename='bg.jpg') }}');
+            background-repeat: repeat;
+            background-size: tile;
+            background-position: center;
+            background-attachment: fixed;
+            background-size: tile;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top:5%;
+            opacity:0.9;
+        }
+        .header {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2c3e50;
+            padding: 10px 20px;
+            color: white;
+            position: fixed;
+            z-index: 1;  
+            height: 6%;
+        }
+        .h1, .h2 {  
+            width: 50%;
+            font-family: 'Arial', sans-serif;
+        }
+        .h1 h3 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .h2 {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            margin-right: 50px;
+        }
+        a {
+            text-decoration: none;
+            color: #ecf0f1;
+            font-size: 16px;
+            font-family: 'Arial', sans-serif;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #1abc9c;
+            cursor: pointer;
+        }
+        /* Responsive Design for Carbon Tracking */
+@media screen and (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+        flex-direction: column;
+    }
+
+    .carbon-stats, .carbon-chart, .carbon-input {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .chart-container {
+        height: 300px;
+    }
+
+    .input-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .input-group {
+        width: 100%;
+    }
+
+    .btn-primary {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+
+    .section-title {
+        font-size: 18px;
+    }
+
+    .carbon-stat-value {
+        font-size: 24px;
+    }
+}
+
+/* Fluid Typography */
+html {
+    font-size: calc(14px + 0.5vw);
+}
+
+/* Responsive Media */
+img, canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Touch-friendly Adjustments */
+@media (pointer: coarse) {
+    .btn, .form-control {
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class='header'>
+        <div class='h1'>
+            <h3>Carbon Tracking</h3>
+        </div>
+        <div class='h2'>
+            <p><a href="/">Home</a></p>
+            <p><a href="/community">Community</a></p>
+            <p><a onclick="logout()">Logout</a></p>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Carbon Tracking Dashboard</h1>
+        
+        <!-- Form to log daily carbon consumption -->
+        <div class="form-section">
+            <h2>Submit Daily Consumption Details</h2>
+            <form method="POST" action="{{ url_for('track_carbon') }}">
+                <div class="form-group">
+                    <label for="transportation">Transportation (km):</label>
+                    <input type="number" name="transportation_km" id="transportation_km" value="10" required>
+                    <label for="transportation_mode">Mode of Transport:</label>
+                    <select name="transportation_mode" id="transportation_mode" required>
+                        <option value="car" selected>Car</option>
+                        <option value="bus">Bus</option>
+                        <option value="bike">Bike</option>
+                    </select>
+                    
+                </div>
+                <div class="form-group">
+                    <label for="electricity">Electricity:</label>
+                    <input type="number" name="electricity_prev_month" id="electricity_prev_month" placeholder="Previous Month (kWh)" required>
+                    <input type="number" name="electricity_today" id="electricity_today" placeholder="Today's Usage (kWh)" required>
+                </div>
+                <div class="form-group">
+                    <label for="waste">Waste:</label>
+                    <input type="number" name="dry_waste" id="dry_waste" placeholder="Dry Waste (kg)" required>
+                    <input type="number" name="wet_waste" id="wet_waste" placeholder="Wet Waste (kg)" required>
+                </div>
+                <button type="submit" class="btn btn-success">Calculate Carbon Footprint</button>
+            </form>
+        </div>
+
+        <!-- Leaderboard section -->
+        <div class="leaderboard-section">
+            <h2>Leaderboard</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>User</th>
+                        <th>City</th>
+                        <th>Total Carbon Footprint (kgCO2e)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in leaderboard_data %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ entry.user.username }}</td>
+                        <td>{{ entry.city }}</td>
+                        <td>{{ entry.totalCarbonFootprint }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Historical Data Visualization -->
+        <div class="charts-section">
+            <h2>Historical Data Trends</h2>
+            <div id="carbon-footprint-chart"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // Plotly code to generate charts
+        var carbonData = {{ carbon_data | safe }};
+        
+        var trace1 = {
+            x: carbonData.dates,
+            y: carbonData.transportation,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Transportation'
+        };
+        
+        var trace2 = {
+            x: carbonData.dates,
+            y: carbonData.electricity,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Electricity'
+        };
+        
+        var trace3 = {
+            x: carbonData.dates,
+            y: carbonData.water,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Water'
+        };
+        
+        var data = [trace1, trace2, trace3];
+        
+        var layout = {
+            title: 'Carbon Footprint Over Time',
+            xaxis: { title: 'Date' },
+            yaxis: { title: 'Carbon Footprint (kg CO2)' }
+        };
+        
+        Plotly.newPlot('carbon-footprint-chart', data, layout);
+        
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Community - Environmental Discussion Board</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Body and Header Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            background-image: url('{{ url_for('static', filename='bg.jpg') }}');
+            background-repeat: repeat;
+            background-size: tile;
+            background-position: center;
+            background-attachment: fixed;
+            background-size: tile;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        /* Navigation Bar Styles */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #1a1a1a;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 1.5rem;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .navbar-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .navbar-links a:hover {
+            background-color: #333;
+        }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid white;
+            color: white;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .logout-btn:hover {
+            background-color: white;
+            color: #1a1a1a;
+        }
+   
+        /* Body and Header Styles */
+        body {
+            
+        }
+        .header {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2c3e50;
+            padding: 10px 20px;
+            color: white;
+            position: fixed;
+            z-index: 1;  
+            height: 6%;
+        }
+        .h1, .h2 {  
+            width: 50%;
+            font-family: 'Arial', sans-serif;
+        }
+        .h1 h3 {
+            margin: 10px;
+            font-size: 24px;
+        }
+        .h2 {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            margin-right: 50px;
+        }
+        a {
+            text-decoration: none;
+            color: #ecf0f1;
+            font-size: 16px;
+            font-family: 'Arial', sans-serif;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #1abc9c;
+            cursor: pointer;
+        }
+
+        /* Content and Posts Styles */
+        .content {
+            margin-top: 70px;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            width: 80%;
+            opacity:1;
+            padding:2%;
+            border-radius:10px;
+        }
+        .create-post {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .post-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-bottom:20px;
+        }
+        .post-input {
+            flex-grow: 1;
+            margin: 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: none;
+            margin-left:20px;
+        }
+        .send-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        .send-btn:hover {
+            transform: scale(1.2);
+        }
+        .send-btn i {
+            color: #1abc9c;
+            font-size: 24px;
+        }
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        @keyframes horizontal-fly {
+            0% {
+                transform: translateX(0) rotate(0);
+                opacity: 1;
+            }
+            70% {
+                transform: translateX(80px) rotate(-15deg);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateX(120px) rotate(-20deg);
+                opacity: 0;
+            }
+        }
+        .horizontal-fly-animation {
+            animation: horizontal-fly 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+        }
+        .create-post-link {
+            display: inline-block;
+            background-color: #1abc9c;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .create-post-link:hover {
+            background-color: #16a085;
+            color: white;
+            scale: 1.05;
+        }
+        .post-list {
+            margin-left: 20px;
+            list-style-type: none;
+            padding: 0;
+        }
+        .post-item {
+            background-color: #F2F0EF;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            opacity:1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .post-meta {
+            font-size: 0.9em;
+            color: #666;
+            margin: 10px 0;
+        }
+        .post-actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            align-items: center;
+        }
+        .like-button, .comment-button {
+            background: none;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        .like-button {
+            color: #666;
+        }
+        .like-button:hover {
+            background-color: #ffebee;
+            color: #e53935;
+        }
+        .like-button.liked {
+            color: #e53935;
+            background-color: #ffebee;
+        }
+        .comment-button {
+            color: #666;
+        }
+        .comment-button:hover {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        .like-count, .comment-count {
+            font-weight: 500;
+        }
+        .comments-section {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-top: 1px solid #eee;
+        }
+
+        .comment-input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .comment-input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .comment-input:focus {
+            border-color: #2196f3;
+        }
+
+        .send-comment-btn {
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .send-comment-btn:hover {
+            background: #1976d2;
+        }
+
+        .comments-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .comment {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .comment-content {
+            margin: 5px 0;
+        }
+
+        .comment-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .comment-like-button {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .comment-like-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .comment-like-button.liked {
+            color: #e74c3c;
+        }
+
+        .comment-like-button.liked i {
+            color: #e74c3c;
+        }
+
+        .comment:hover {
+            background-color: #f1f1f1;
+        }
+
+        .comment-meta {
+            font-size: 0.9em;
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .comment-time {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        /* Popup Styles */
+        .popup {
+            display: none;
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            width: 300px;
+            height: auto;
+            border-radius: 10px;
+        }
+        .popup-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        .popup-content h1 {
+            text-align: center;
+            color: #333;
+        }
+        .popup-content label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #555;
+        }
+        .popup-content input[type="text"], .popup-content textarea {
+            width: 90%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            resize: none;
+        }
+        .popup-content textarea {
+            height: 100px;
+        }
+        .popup-content button {
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+
+        }
+        .popup-content button:hover {
+            background-color: #16a085;
+        }
+        .close-btn {    
+            top: 10px;
+            width:50
+            left: 10px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .close-btn:hover {
+            color: #333;
+        }
+        .close{
+            width: 70%;
+        }
+
+        /* Notification Styles */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            align-self:center;
+            margin-right: 20px;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+
+        .notifications-panel {
+            display: none;
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .notification-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .notification-item.unread {
+            background-color: #e8f4f8;
+        }
+
+        .approve-button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .approve-button:hover {
+            background-color: #27ae60;
+        }
+        
+        .approve-button:active {
+            background-color: #219a52;
+        }
+
+        .delete-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+
+        .delete-button:active {
+            background-color: #a93226;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        /* Responsive Design Enhancements */
+@media screen and (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .navbar-links {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        align-items: center;
+    }
+
+    .header {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+    }
+
+    .h1, .h2 {
+        width: 100%;
+        text-align: center;
+        margin: 5px 0;
+    }
+
+    .content {
+        width: 95%;
+        margin-top: 180px;
+        padding: 3%;
+    }
+
+    .post-input-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .post-input {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+
+    .h1 h3 {
+        font-size: 20px;
+    }
+}
+.content {
+        width: 95%;
+        margin-top: 180px;
+        padding: 3%;
+    }
+
+/* Fluid Typography */
+html {
+    font-size: calc(14px + 0.5vw);
+}
+
+/* Responsive Media */
+img, video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Touch-friendly Adjustments */
+@media (pointer: coarse) {
+    .navbar-links a, .send-btn {
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+    </style>
+</head>
+<body>
+    
+    <div class='header'>
+        <div class='h1'>
+            <h3>Environmental Discussion Board</h3>
+        </div>
+        <div class='h2'>
+            <div class="notification-bell" onclick="toggleNotifications()">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count" id="notification-count">0</span>
+            </div>
+            <p><a href="/">Home</a></p>
+            <p><a href="/carbon_tracking">Carbon Tracking</a></p>
+            <p><a onclick="logout()">Logout</a></p>
+        </div>
+    </div>
+
+    <div class="notifications-panel" id="notifications-panel">
+        <!-- Notifications will be dynamically inserted here -->
+    </div>
+
+    <div class="content">
+        <h1>Environmental Discussion Board</h1>
+        <div class="create-post">
+            <div id="post-step-1" class="post-input-container">
+                <textarea id="post-content-input" class="post-input" placeholder="Share what's on your mind..." rows="1"></textarea>
+                <button id="post-step-1-send" class="send-btn" onclick="proceedToPostStep2()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div id="post-step-2" class="post-input-container" style="display: none;">
+                <textarea id="post-title-input" class="post-input" placeholder="Name your thought..." rows="1"></textarea>
+                <button id="post-step-2-send" class="send-btn" onclick="submitPost()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="post-list">
+            {% if posts %}
+                {% for post in posts %}
+                <div class="post-item" id="post-{{ post.id }}">
+                    <div class="post-meta">
+                        <h2><i class="fas fa-user"></i>  {{ post.author.username }}</h2>
+                        {% if not post.is_approved and post.user_id != user.id %}
+                            <span class="pending-approval">Pending Approval</span>
+                        {% endif %}
+                    </div>
+                    <h3>{{ post.title }}</h3>
+                    <p>{{ post.description }}</p>
+                    
+                    <div class="post-actions">
+                        <button class="like-button {% if post.id in user_likes %}liked{% endif %}" 
+                                onclick="likePost({{ post.id }})">
+                            <i class="fas fa-heart"></i>
+                            <span class="like-count">{{ post.likes|length }}</span>
+                            <span class="button-text">Like</span>
+                        </button>
+                        <button class="comment-button" onclick="toggleComments({{ post.id }})">
+                            <i class="fas fa-comment"></i>
+                            <span class="comment-count">{{ post.comments|length }}</span>
+                            <span class="button-text">Comments</span>
+                        </button>
+                        {% if user.role == 'admin' %}
+                            <div class="admin-actions">
+                                {% if not post.is_approved %}
+                                    <button class="approve-button" onclick="approvePost({{ post.id }})">
+                                        <i class="fas fa-check"></i>
+                                        Approve
+                                    </button>
+                                {% endif %}
+                                <button class="delete-button" onclick="deletePost({{ post.id }})">
+                                    <i class="fas fa-trash"></i>
+                                    Delete
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if post.comments %}
+                        <div id="comments-section-{{ post.id }}" class="comments-section">
+                            <div class="comment-input-section">
+                                <input type="text" 
+                                       class="comment-input" 
+                                       placeholder="Write a comment..." 
+                                       id="comment-input-{{ post.id }}">
+                                <button class="send-comment-btn" onclick="sendComment({{ post.id }})">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                            <div class="comments-list">
+                                {% for comment in post.comments|sort(attribute='created_at', reverse=True) %}
+                                    <div class="comment" id="comment-{{ comment.id }}">
+                                        <div class="comment-meta">
+                                            <i class="fas fa-user"></i>
+                                            <span>{{ comment.author.username }}</span>
+                                            <span class="comment-time" data-timestamp="{{ comment.created_at.strftime('%Y-%m-%dT%H:%M:%S') }}">
+                                                • just now
+                                            </span>
+                                        </div>
+                                        <p class="comment-content">{{ comment.content }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div id="comments-section-{{ post.id }}" class="comments-section">
+                            <div class="comment-input-section">
+                                <input type="text" 
+                                       class="comment-input" 
+                                       placeholder="Write a comment..." 
+                                       id="comment-input-{{ post.id }}">
+                                <button class="send-comment-btn" onclick="sendComment({{ post.id }})">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                            <div class="comments-list">
+                                <p class="text-muted">No comments yet. Be the first to comment!</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; color: #666; margin-top: 30px;">No posts yet. Be the first to create one!</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        let currentPostId = null;
+
+        async function approvePost(postId) {
+            try {
+                const response = await fetch(`/admin/approve_post/${postId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Post approved successfully!');
+                    location.reload();
+                } else {
+                    const data = await response.json();
+                    alert(`Error: ${data.error || 'Failed to approve post'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to approve post. Please try again.');
+            }
+        }
+
+        function toggleNotifications() {
+            const panel = document.getElementById('notifications-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            if (panel.style.display === 'block') {
+                fetchNotifications();
+            }
+        }
+
+        async function fetchNotifications() {
+            const response = await fetch('/notifications');
+            const notifications = await response.json();
+            const panel = document.getElementById('notifications-panel');
+            panel.innerHTML = '';
+            
+            notifications.forEach(notification => {
+                const notificationElement = document.createElement('div');
+                notificationElement.className = `notification-item ${notification.read ? '' : 'unread'}`;
+                notificationElement.innerHTML = `
+                    <p>${notification.message}</p>
+                    <small>${new Date(notification.created_at).toLocaleString()}</small>
+                `;
+                notificationElement.onclick = () => markNotificationRead(notification.id);
+                panel.appendChild(notificationElement);
+            });
+
+            document.getElementById('notification-count').textContent = notifications.filter(n => !n.read).length;
+        }
+
+        async function markNotificationRead(notificationId) {
+            await fetch(`/notifications/mark_read/${notificationId}`, {
+                method: 'POST'
+            });
+            fetchNotifications();
+        }
+
+        async function likePost(postId) {
+            try {
+                const response = await fetch(`/post/${postId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const likeButton = document.querySelector(`button[onclick="likePost(${postId})"]`);
+                    const likeCount = likeButton.querySelector('.like-count');
+                    
+                    if (data.liked) {
+                        likeButton.classList.add('liked');
+                    } else {
+                        likeButton.classList.remove('liked');
+                    }
+                    
+                    likeCount.textContent = data.likeCount;
+                } else {
+                    alert(data.error || 'Failed to like post');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to like post. Please try again.');
+            }
+        }
+
+        function openCommentPopup(postId) {
+            currentPostId = postId;
+            document.getElementById('postId').value = postId;
+            document.getElementById('comment').value = ''; // Clear previous comment
+            document.getElementById('commentPopup').style.display = 'flex';
+        }
+
+        function closeCommentPopup() {
+            document.getElementById('commentPopup').style.display = 'none';
+            currentPostId = null;
+        }
+
+        function openCreatePopup() {
+            document.getElementById('createPopup').style.display = 'flex';
+            document.getElementById('title').value = ''; // Clear previous input
+            document.getElementById('description').value = ''; // Clear previous input
+        }
+
+        function closeCreatePopup() {
+            document.getElementById('createPopup').style.display = 'none';
+        }
+
+        document.getElementById('createPostForm').onsubmit = async function(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/create_post', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    },
+                    body: JSON.stringify({
+                        title: document.getElementById('title').value,
+                        description: document.getElementById('description').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Post created successfully! Waiting for admin approval.');
+                    closeCreatePopup();
+                    location.reload();
+                } else {
+                    alert(data.error || 'Failed to create post');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to create post. Please try again.');
+            }
+        };
+
+        async function deletePost(postId) {
+            if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/delete_post/${postId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Remove the post from the UI
+                    document.getElementById(`post-${postId}`).remove();
+                    alert('Post deleted successfully');
+                } else {
+                    alert(data.error || 'Failed to delete post');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete post. Please try again.');
+            }
+        }
+
+        async function sendComment(postId) {
+            const input = document.getElementById(`comment-input-${postId}`);
+            const content = input.value.trim();
+            
+            if (!content) return;
+            
+            try {
+                const response = await fetch(`/post/${postId}/comment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to add comment');
+                }
+                
+                const data = await response.json();
+                
+                // Add the new comment to the UI
+                const commentsList = document.querySelector(`#comments-section-${postId} .comments-list`);
+                
+                // Remove "no comments" message if it exists
+                const noComments = commentsList.querySelector('.text-muted');
+                if (noComments) {
+                    noComments.remove();
+                }
+                
+                const newComment = document.createElement('div');
+                newComment.className = 'comment';
+                newComment.id = `comment-${data.comment.id}`;
+                newComment.innerHTML = `
+                    <div class="comment-meta">
+                        <i class="fas fa-user"></i>
+                        <span>${data.comment.author}</span>
+                        <span class="comment-time" data-timestamp="${data.comment.created_at}">• just now</span>
+                    </div>
+                    <p class="comment-content">${data.comment.content}</p>
+                    <div class="comment-actions">
+                    </div>
+                `;
+                
+                // Insert at the beginning of the list (newest first)
+                commentsList.insertBefore(newComment, commentsList.firstChild);
+                
+                // Clear input
+                input.value = '';
+                
+                // Update comment count
+                const commentButton = document.querySelector(`button[onclick="toggleComments(${postId})"]`);
+                const commentCount = commentButton.querySelector('.comment-count');
+                commentCount.textContent = parseInt(commentCount.textContent) + 1;
+                
+                // Update the timestamp immediately
+                updateCommentTimes();
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message || 'Failed to add comment. Please try again.');
+            }
+        }
+
+        async function likeComment(commentId) {
+    try {
+        const response = await fetch(`/comment/${commentId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            const likeButton = document.querySelector(`#comment-${commentId} .comment-like-button`);
+            const likeCount = document.querySelector(`#comment-${commentId} .comment-like-count`);
+
+            likeButton.classList.toggle('liked');
+            likeCount.textContent = data.likes_count;
+        } else {
+            alert(data.error || 'Failed to like comment');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to like comment. Please try again.');
+    }
+}
+
+        function updateCommentTimes() {
+            document.querySelectorAll('.comment-time').forEach(timeElement => {
+                const timestamp = timeElement.dataset.timestamp;
+                timeElement.textContent = '• ' + getRelativeTimeString(timestamp);
+            });
+        }
+
+        // Update times every minute
+        setInterval(updateCommentTimes, 60000);
+        
+        // Initial update
+        updateCommentTimes();
+
+        function toggleComments(postId) {
+            const commentsSection = document.getElementById(`comments-section-${postId}`);
+            const isHidden = commentsSection.style.display === 'none' || !commentsSection.style.display;
+            commentsSection.style.display = isHidden ? 'block' : 'none';
+            
+            // Update the button text accordingly
+            const commentButton = document.querySelector(`button[onclick="toggleComments(${postId})"]`);
+            commentButton.querySelector('.button-text').textContent = isHidden ? 'Comments' : 'Comments';
+        }
+        function getRelativeTimeString(dateStr) {
+    const date = new Date(dateStr);
+    const now = new Date();
+    
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInSeconds = Math.floor(diffInMs / 1000);
+    
+    if (diffInSeconds < 60) {
+        return 'just now';
+    }
+    
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) {
+        return `${diffInMinutes}m ago`;
+    }
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) {
+        return `${diffInHours}h ago`;
+    }
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) {
+        return diffInDays === 1 ? '1 day ago' : `${diffInDays} days ago`;
+    }
+    
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    if (diffInWeeks < 4) {
+        return diffInWeeks === 1 ? '1w ago' : `${diffInWeeks}w ago`;
+    }
+    
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths < 12) {
+        return diffInMonths === 1 ? '1m ago' : `${diffInMonths}m ago`;
+    }
+    
+    const diffInYears = Math.floor(diffInDays / 365);
+    return diffInYears === 1 ? '1y ago' : `${diffInYears}y ago`;
+}
+
+
+// Update the timestamp immediately after adding a comment
+function updateCommentTimes() {
+    document.querySelectorAll('.comment-time').forEach(timeElement => {
+        const timestamp = timeElement.dataset.timestamp;
+        timeElement.textContent = '• ' + getRelativeTimeString(timestamp);
+    });
+}
+function logout() {
+    localStorage.removeItem('access_token');
+    window.location.href = '/';
+}
+
+// Fetch notifications periodically
+setInterval(fetchNotifications, 10000);  // Every 10 seconds
+
+// Initial fetch
+fetchNotifications();
+
+        function proceedToPostStep2() {
+            const contentInput = document.getElementById('post-content-input');
+            const step1Button = document.getElementById('post-step-1-send');
+            const step1Container = document.getElementById('post-step-1');
+            const step2Container = document.getElementById('post-step-2');
+
+            // Validate content input
+            if (!contentInput.value.trim()) {
+                alert('Please enter some content before proceeding.');
+                return;
+            }
+
+            // Disable first step
+            contentInput.disabled = true;
+            step1Button.disabled = true;
+            step1Container.style.display = 'none';
+            step2Container.style.display = 'flex';
+        }
+
+        async function submitPost() {
+            const contentInput = document.getElementById('post-content-input');
+            const titleInput = document.getElementById('post-title-input');
+            const step2Button = document.getElementById('post-step-2-send');
+            const step1Container = document.getElementById('post-step-1');
+            const step2Container = document.getElementById('post-step-2');
+
+            // Validate title input
+            if (!titleInput.value.trim()) {
+                alert('Please enter a title for your post.');
+                return;
+            }
+
+            // Add horizontal fly animation to the final send button
+            step2Button.classList.add('horizontal-fly-animation');
+
+            try {
+                const response = await fetch('/create_post', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    },
+                    body: JSON.stringify({
+                        title: titleInput.value.trim(),
+                        description: contentInput.value.trim()
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Use setTimeout to allow animation to complete
+                    setTimeout(() => {
+                        alert('Post created successfully! Waiting for admin approval.');
+                        
+                        // Reset the form
+                        contentInput.value = '';
+                        contentInput.disabled = false;
+                        titleInput.value = '';
+                        
+                        step1Container.style.display = 'flex';
+                        step2Container.style.display = 'none';
+
+                        // Remove animation class
+                        step2Button.classList.remove('horizontal-fly-animation');
+
+                        // Reload the page to show the new post
+                        location.reload();
+                    }, 600);
+                } else {
+                    // Remove animation if there's an error
+                    step2Button.classList.remove('horizontal-fly-animation');
+                    alert(data.error || 'Failed to create post');
+                }
+            } catch (error) {
+                // Remove animation if there's an error
+                step2Button.classList.remove('horizontal-fly-animation');
+                console.error('Error:', error);
+                alert('Failed to create post. Please try again.');
+            }
+        }
+    </script>
+
+    <!-- Restore the original create post popup -->
+    <div class="popup" id="createPopup">
+        <div class="popup-content">
+            <button class="close-btn" onclick="closeCreatePopup()">&times;</button>
+            <h2>Create New Post</h2>
+            <form id="createPostForm">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" required>
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" required></textarea>
+                <button type="submit">Post</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Restore the original form submission handler for the popup
+        document.getElementById('createPostForm').onsubmit = async function(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/create_post', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    },
+                    body: JSON.stringify({
+                        title: document.getElementById('title').value,
+                        description: document.getElementById('description').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Post created successfully! Waiting for admin approval.');
+                    closeCreatePopup();
+                    location.reload();
+                } else {
+                    alert(data.error || 'Failed to create post');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to create post. Please try again.');
+            }
+        };
+    </script>
+</body>
+    
+</html>
